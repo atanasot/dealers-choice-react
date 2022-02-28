@@ -1,0 +1,100 @@
+<html>
+  <head>
+    <script
+      src="https://unpkg.com/react@17/umd/react.production.min.js"
+      crossorigin
+    ></script>
+    <script
+      src="https://unpkg.com/react-dom@17/umd/react-dom.production.min.js"
+      crossorigin
+    ></script>
+    <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.26.0/axios.min.js"
+      integrity="sha512-bPh3uwgU5qEMipS/VOmRqynnMXGGSRv+72H/N260MQeXZIK4PG48401Bsby9Nq5P5fz7hy5UGNmC/W1Z51h2GQ=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    ></script>
+    <title>Dealers_Choice_Uni</title>
+  </head>
+  <body>
+    <h1>Univerity of Dealers_Choice_React</h1>
+    <div id="root"></div>
+    <script type="text/babel">
+
+        const Major = (props) => {
+            const major = props.major
+            return (
+                <li>{major.name}</li>
+            )
+        }
+
+        const Department = (props) => {
+            //console.log(props) we get 4 objs representing the departments //props come from department={departmemnt} in render()
+            const department = props.department //this comes from the props
+            return (
+                <li>
+                  {department.name}
+                  <ul>
+                    {department.majors.map((major) => (
+                      < Major key={major.id} major={major}/>
+                    ))}
+                  </ul>
+                </li>
+            )
+        }
+      //   const Major = (props) => {
+      //     const major = props.major;
+      //     return <li>{major.name}</li>;
+      //   };
+
+
+      class App extends React.Component {
+        constructor() {
+          super();
+          this.state = {
+            majors: [],
+            departments: [],
+            loading: true,
+          };
+        }
+
+        async componentDidMount() {
+          try {
+            //1. make axios call to get all the data
+            const majorsResponse = await axios.get("/api/majors");
+            const axiosMajors = majorsResponse.data;
+
+            const departmentsResponse = await axios.get("/api/departments");
+            const axiosDepartments = departmentsResponse.data;
+
+            //2.setState() with the majors which will render the new data an displays it
+            // render() is being called twice
+            this.setState({   //post,delete, put change the state because they modify the data
+              majors: axiosMajors,
+              departments: axiosDepartments,
+              loading: false,
+            });
+          } catch (err) {
+            console.log(err);
+          }
+        }
+
+
+        render() {
+          if (this.state.loading) return <h2>Loading...</h2>;
+          return (
+            <ul>
+              {this.state.departments.map((department) => (
+                <Department key={department.id} department={department}/>
+              ))}
+            </ul>
+          );
+        }
+      }
+
+      const root = document.querySelector("#root");
+      ReactDOM.render(<App />, root);
+    </script>
+  </body>
+</html>
