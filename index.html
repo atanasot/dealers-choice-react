@@ -21,30 +21,40 @@
     <h1>Univerity of Dealers_Choice_React</h1>
     <div id="root"></div>
     <script type="text/babel">
-
-        //***************Major component**************** we want to delete a major
+      //***************Major component**************** we want to delete a major
       const Major = (props) => {
         const major = props.major;
-        return <li>{major.name}</li>; 
+        const onDelete = props.onDelete;
+        //console.log(props);
+        return (
+          <li
+            onClick={() => {
+              onDelete(major.id);
+            }}
+          >
+            {major.name}
+          </li>
+        );
       };
-
 
       // ********Department component********
       const Department = (props) => {
-      //we get 4 objs representing the departments .... props came from department={departmemnt} in render()
-        const department = props.department; //this comes from the props
+        //we get 4 objs representing the departments .... props came from department={departmemnt} in render()
+        const department = props.department;
+        const onDelete = props.onDelete; 
+        const departmentMajors = props.majors.filter(major => major.departmentId === department.id)
+        console.log(departmentMajors)
         return (
           <li>
             {department.name}
             <ul>
-              {department.majors.map((major) => (
-                <Major onClick={() => this.props.onDelete(this.props.major.id)} key={major.id} major={major} /> //onDelete goes here???
+              {departmentMajors.map((major) => (
+                <Major onDelete={onDelete} key={major.id} major={major} /> 
               ))}
             </ul>
           </li>
         );
       };
-
 
       //**************App component********************
       class App extends React.Component {
@@ -55,12 +65,21 @@
             departments: [],
             loading: true,
           };
+          this.onDelete = this.onDelete.bind(this);
         }
 
         //method for deleting a major goes here because we want to delete the major from the majors array on state
-        handleDelete = (majorId) => {
-            const filteredMajors = this.state.majors.filter(major => major.id !== majorId)
-            this.setState({majors: filteredMajors})  // need to pass in the td for the one thats getting deleted id={major.id}
+        async onDelete(majorId) {
+          try {
+            await axios.delete(`/api/majors/${majorId}`);
+            //render data after deleting
+            const filteredMajors = this.state.majors.filter(
+              (major) => major.id !== majorId
+            );
+            this.setState({ majors: filteredMajors });
+          } catch (err) {
+            console.log("Error occurred while trying to delete a major");
+          }
         }
 
         async componentDidMount() {
@@ -75,7 +94,6 @@
             //2.setState() with the majors which will render the new data an displays it
             // render() is being called twice
             this.setState({
-              //post,delete, put change the state because they modify the data
               majors: axiosMajors,
               departments: axiosDepartments,
               loading: false,
@@ -90,7 +108,12 @@
           return (
             <ul>
               {this.state.departments.map((department) => (
-                <Department key={department.id} department={department} onDelete={this.handleDelete}/>
+                <Department
+                  key={department.id}
+                  department={department}
+                  onDelete={this.onDelete}
+                  majors={this.state.majors}
+                />
               ))}
             </ul>
           );
