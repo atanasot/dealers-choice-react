@@ -21,11 +21,10 @@
     <h1>Univerity of Dealers_Choice_React</h1>
     <div id="root"></div>
     <script type="text/babel">
-      //***************Major component**************** we want to delete a major
+      //***************Major component****************
       const Major = (props) => {
         const major = props.major;
         const onDelete = props.onDelete;
-        //console.log(props);
         return (
           <li
             onClick={() => {
@@ -39,17 +38,18 @@
 
       // ********Department component********
       const Department = (props) => {
-        //we get 4 objs representing the departments .... props came from department={departmemnt} in render()
         const department = props.department;
-        const onDelete = props.onDelete; 
-        const departmentMajors = props.majors.filter(major => major.departmentId === department.id)
-        console.log(departmentMajors)
+        const onDelete = props.onDelete;
+        const departmentMajors = props.majors.filter(
+          (major) => major.departmentId === department.id
+        );
+        console.log(departmentMajors);
         return (
           <li>
             {department.name}
             <ul>
               {departmentMajors.map((major) => (
-                <Major onDelete={onDelete} key={major.id} major={major} /> 
+                <Major onDelete={onDelete} key={major.id} major={major} />
               ))}
             </ul>
           </li>
@@ -68,11 +68,9 @@
           this.onDelete = this.onDelete.bind(this);
         }
 
-        //method for deleting a major goes here because we want to delete the major from the majors array on state
         async onDelete(majorId) {
           try {
             await axios.delete(`/api/majors/${majorId}`);
-            //render data after deleting
             const filteredMajors = this.state.majors.filter(
               (major) => major.id !== majorId
             );
@@ -84,15 +82,12 @@
 
         async componentDidMount() {
           try {
-            //1. make axios call to get all the data
             const majorsResponse = await axios.get("/api/majors");
             const axiosMajors = majorsResponse.data;
 
             const departmentsResponse = await axios.get("/api/departments");
             const axiosDepartments = departmentsResponse.data;
 
-            //2.setState() with the majors which will render the new data an displays it
-            // render() is being called twice
             this.setState({
               majors: axiosMajors,
               departments: axiosDepartments,
